@@ -115,9 +115,12 @@ jobs:
           REGISTRY=${{ env.REGISTRY }}
           REPO_NAME=${{ steps.lower.outputs.repo_name }}
           IMAGE="${REGISTRY}/${REPO_NAME}-backend:latest"
-          sed -i "s|image: .*backend.*|image: ${IMAGE}|g" kubernetes/backend-deployment.yaml
-          echo "Updated backend deployment to image: ${IMAGE}"
-          grep -A 1 "image:" kubernetes/backend-deployment.yaml
+          echo "Before:"
+          grep "image:" kubernetes/backend-deployment.yaml
+          sed -i "s|image: .*|image: ${IMAGE}|g" kubernetes/backend-deployment.yaml
+          echo "After:"
+          grep "image:" kubernetes/backend-deployment.yaml
+
 
       - name: Update frontend deployment image
         run: |
