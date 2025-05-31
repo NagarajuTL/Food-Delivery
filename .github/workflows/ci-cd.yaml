@@ -127,18 +127,22 @@ jobs:
           REGISTRY=${{ env.REGISTRY }}
           REPO_NAME=${{ steps.lower.outputs.repo_name }}
           IMAGE="${REGISTRY}/${REPO_NAME}-frontend:latest"
-          sed -i "s|image: .*frontend.*|image: ${IMAGE}|g" kubernetes/frontend-deployment.yaml
-          echo "Updated frontend deployment to image: ${IMAGE}"
-          grep -A 1 "image:" kubernetes/frontend-deployment.yaml
+          echo "Before:"
+          grep "image:" kubernetes/frontend-deployment.yaml
+          sed -i "s|image: .*|image: ${IMAGE}|g" kubernetes/frontend-deployment.yaml
+          echo "After:"
+          grep "image:" kubernetes/frontend-deployment.yaml
 
       - name: Update admin deployment image
         run: |
           REGISTRY=${{ env.REGISTRY }}
           REPO_NAME=${{ steps.lower.outputs.repo_name }}
           IMAGE="${REGISTRY}/${REPO_NAME}-admin:latest"
-          sed -i "s|image: .*admin.*|image: ${IMAGE}|g" kubernetes/admin-deployment.yaml
-          echo "Updated admin deployment to image: ${IMAGE}"
-          grep -A 1 "image:" kubernetes/admin-deployment.yaml
+          echo "Before:"
+          grep "image:" kubernetes/admin-deployment.yaml
+          sed -i "s|image: .*|image: ${IMAGE}|g" kubernetes/admin-deployment.yaml
+          echo "After:"
+          grep "image:" kubernetes/admin-deployment.yaml
 
       # Optional: Uncomment to auto-commit deployment updates
       - name: Commit and push changes
