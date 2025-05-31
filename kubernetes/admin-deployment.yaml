@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: admin
-          image: ghcr.io/<your-username>/tomato-admin:latest
+          image: ghcr.io/NagarajuTL/tomato-admin:latest
           ports:
             - containerPort: 80

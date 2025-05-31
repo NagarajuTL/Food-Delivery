@@ -23,6 +23,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: Set lowercase image name
+        id: lower
+        run: echo "image_name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -34,6 +39,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.TOKEN }}
 
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          image: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+            latest
+
       # Build backend image
       - name: Build backend Docker image
         uses: docker/build-push-action@v5
@@ -41,7 +56,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-backend:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-backend:latest
 
       - name: Set backend image tag output
         id: backend_set_output
@@ -54,7 +69,7 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-frontend:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-frontend:latest
 
       - name: Set frontend image tag output
         id: frontend_set_output
@@ -67,7 +82,7 @@ jobs:
         with:
           context: ./admin
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}-admin:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-admin:latest
 
       - name: Set admin image tag output
         id: admin_set_output
@@ -122,6 +137,7 @@ jobs:
           echo "Updated admin deployment to image: ${IMAGE}"
           grep -A 1 "image:" kubernetes/admin-deployment.yaml
 
+      # Optional: Uncomment to auto-commit deployment updates
       # - name: Commit and push changes
       #   run: |
       #     git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml kubernetes/admin-deployment.yaml
