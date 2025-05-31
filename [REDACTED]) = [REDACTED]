@@ -1,1 +1,0 @@
-git filter-repo --replace-text <(echo sk_test_your_old_key =
