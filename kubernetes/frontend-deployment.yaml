@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/NagarajuTL/tomato-frontend:latest
+          image: /nagarajutl/food-delivery-frontend:latest
           ports:
             - containerPort: 80
