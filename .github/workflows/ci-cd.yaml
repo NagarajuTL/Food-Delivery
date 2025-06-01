@@ -109,42 +109,43 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-
+      
       - name: Update backend deployment image
+        env:
+          REGISTRY: ghcr.io
+          REPO_NAME: ${{ steps.lower.outputs.repo_name }}
         run: |
-          REGISTRY=${{ env.REGISTRY }}
-          REPO_NAME=${{ steps.lower.outputs.repo_name }}
-          IMAGE="${REGISTRY}/${REPO_NAME}-backend:latest"
-          echo "Before:"
-          grep "image:" kubernetes/backend-deployment.yaml
-          sed -i "s|image: .*|image: ${IMAGE}|g" kubernetes/backend-deployment.yaml
+
+          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-backend:latest"
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" kubernetes/backend-deployment.yaml
           echo "After:"
           grep "image:" kubernetes/backend-deployment.yaml
 
 
       - name: Update frontend deployment image
+        env:
+          REGISTRY: ghcr.io
+          REPO_NAME: ${{ steps.lower.outputs.repo_name }}
         run: |
-          REGISTRY=${{ env.REGISTRY }}
-          REPO_NAME=${{ steps.lower.outputs.repo_name }}
-          IMAGE="${REGISTRY}/${REPO_NAME}-frontend:latest"
-          echo "Before:"
-          grep "image:" kubernetes/frontend-deployment.yaml
-          sed -i "s|image: .*|image: ${IMAGE}|g" kubernetes/frontend-deployment.yaml
+
+          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-frontend:latest"
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" kubernetes/frontend-deployment.yaml
           echo "After:"
           grep "image:" kubernetes/frontend-deployment.yaml
+
 
       - name: Update admin deployment image
+        env:
+          REGISTRY: ghcr.io
+          REPO_NAME: ${{ steps.lower.outputs.repo_name }}
         run: |
-          REGISTRY=${{ env.REGISTRY }}
-          REPO_NAME=${{ steps.lower.outputs.repo_name }}
-          IMAGE="${REGISTRY}/${REPO_NAME}-admin:latest"
-          echo "Before:"
-          grep "image:" kubernetes/admin-deployment.yaml
-          sed -i "s|image: .*|image: ${IMAGE}|g" kubernetes/admin-deployment.yaml
+
+          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-admin:latest"
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" kubernetes/admin-deployment.yaml
           echo "After:"
           grep "image:" kubernetes/admin-deployment.yaml
 
-      # Optional: Uncomment to auto-commit deployment updates
+
       - name: Commit and push changes
         run: |
           git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml kubernetes/admin-deployment.yaml
