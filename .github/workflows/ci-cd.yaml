@@ -151,3 +151,4 @@ jobs:
           git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml kubernetes/admin-deployment.yaml
           git commit -m "Update deployment images [skip ci]" || echo "No changes to commit"
           git push
+####
