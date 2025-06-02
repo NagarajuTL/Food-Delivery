@@ -39,61 +39,52 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.TOKEN }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          image: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}
-          tags: |
-            type=sha,format=long
-            type=ref,event=branch
-            latest
+      - name: Set image tag
+        id: tag
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        shell: bash
 
       # Build backend image
       - name: Build backend Docker image
         uses: docker/build-push-action@v5
-        id: backend_build
         with:
           context: ./backend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-backend:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-backend:${{ steps.tag.outputs.tag }}
 
       - name: Set backend image tag output
         id: backend_set_output
-        run: echo "image_tag=latest" >> $GITHUB_OUTPUT
+        run: echo "image_tag=${{ steps.tag.outputs.tag }}" >> $GITHUB_OUTPUT
 
       # Build frontend image
       - name: Build frontend Docker image
         uses: docker/build-push-action@v5
-        id: frontend_build
         with:
           context: ./frontend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-frontend:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-frontend:${{ steps.tag.outputs.tag }}
 
       - name: Set frontend image tag output
         id: frontend_set_output
-        run: echo "image_tag=latest" >> $GITHUB_OUTPUT
+        run: echo "image_tag=${{ steps.tag.outputs.tag }}" >> $GITHUB_OUTPUT
 
       # Build admin image
       - name: Build admin Docker image
         uses: docker/build-push-action@v5
-        id: admin_build
         with:
           context: ./admin
           push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-admin:latest
+          tags: ${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}-admin:${{ steps.tag.outputs.tag }}
 
       - name: Set admin image tag output
         id: admin_set_output
-        run: echo "image_tag=latest" >> $GITHUB_OUTPUT
+        run: echo "image_tag=${{ steps.tag.outputs.tag }}" >> $GITHUB_OUTPUT
 
   update-k8s:
     name: Update Kubernetes Deployment
     runs-on: ubuntu-latest
     needs: [docker]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -109,46 +100,39 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-      
+
       - name: Update backend deployment image
         env:
           REGISTRY: ghcr.io
           REPO_NAME: ${{ steps.lower.outputs.repo_name }}
+          IMAGE_TAG: ${{ needs.docker.outputs.backend_image_tag }}
         run: |
-
-          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-backend:latest"
+          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-backend:${IMAGE_TAG}"
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" kubernetes/backend-deployment.yaml
-          echo "After:"
-          grep "image:" kubernetes/backend-deployment.yaml
-
+          echo "Updated backend image to ${NEW_IMAGE}"
 
       - name: Update frontend deployment image
         env:
           REGISTRY: ghcr.io
           REPO_NAME: ${{ steps.lower.outputs.repo_name }}
+          IMAGE_TAG: ${{ needs.docker.outputs.frontend_image_tag }}
         run: |
-
-          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-frontend:latest"
+          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-frontend:${IMAGE_TAG}"
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" kubernetes/frontend-deployment.yaml
-          echo "After:"
-          grep "image:" kubernetes/frontend-deployment.yaml
-
+          echo "Updated frontend image to ${NEW_IMAGE}"
 
       - name: Update admin deployment image
         env:
           REGISTRY: ghcr.io
           REPO_NAME: ${{ steps.lower.outputs.repo_name }}
+          IMAGE_TAG: ${{ needs.docker.outputs.admin_image_tag }}
         run: |
-
-          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-admin:latest"
+          NEW_IMAGE="${REGISTRY}/${REPO_NAME}-admin:${IMAGE_TAG}"
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" kubernetes/admin-deployment.yaml
-          echo "After:"
-          grep "image:" kubernetes/admin-deployment.yaml
-
+          echo "Updated admin image to ${NEW_IMAGE}"
 
       - name: Commit and push changes
         run: |
           git add kubernetes/backend-deployment.yaml kubernetes/frontend-deployment.yaml kubernetes/admin-deployment.yaml
           git commit -m "Update deployment images [skip ci]" || echo "No changes to commit"
           git push
-####
