@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/nagarajutl/food-delivery-frontend:sha-dfd195a
+          image: ghcr.io/nagarajutl/food-delivery-frontend:sha-b3470e4
           ports:
             - containerPort: 80
       imagePullSecrets:
