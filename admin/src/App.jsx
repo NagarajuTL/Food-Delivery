@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./components/Login/Login";
 
 const App = () => {
-  const url = "http://52.90.175.183:32000";
+  const url = "http://52.90.175.183:5000";
   return (
     <div>
       <ToastContainer />
