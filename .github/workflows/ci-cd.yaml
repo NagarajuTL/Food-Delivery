@@ -55,7 +55,7 @@ jobs:
         id: backend_set_output
         run: echo "image_tag=${{ steps.tag.outputs.tag }}" >> $GITHUB_OUTPUT
 
-      # Build frontend imagee 
+      # Build frontend imag
       - name: Build frontend Docker image
         uses: docker/build-push-action@v5
         with:
