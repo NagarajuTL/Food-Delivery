@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: admin
-          image: ghcr.io/nagarajutl/food-delivery-admin:sha-259c0f4
+          image: ghcr.io/nagarajutl/food-delivery-admin:sha-3ab1911
           ports:
             - containerPort: 80
       imagePullSecrets:
