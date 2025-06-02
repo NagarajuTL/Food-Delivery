@@ -28,5 +28,5 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_SECRET
-imagePullSecrets:
-      - name: github-container-registry
+    imagePullSecrets:
+          - name: github-container-registry
