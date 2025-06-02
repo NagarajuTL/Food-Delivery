@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/nagarajutl/food-delivery-backend:sha-00ca0c9
+          image: ghcr.io/nagarajutl/food-delivery-backend:sha-dfd195a
           ports:
             - containerPort: 5000
           env:
