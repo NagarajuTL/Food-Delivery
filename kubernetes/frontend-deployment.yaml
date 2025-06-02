@@ -17,5 +17,5 @@ spec:
           image: ghcr.io/nagarajutl/food-delivery-frontend:sha-062304f
           ports:
             - containerPort: 80
-    imagePullSecrets:
-          - name: github-container-registry
+      imagePullSecrets:
+            - name: github-container-registry
